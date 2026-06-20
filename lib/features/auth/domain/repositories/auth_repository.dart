@@ -1,8 +1,10 @@
+import '../models/user.dart';
+
 abstract class AuthRepository {
-  Future<bool> login(String email, String password);
-  Future<bool> register(String email, String password);
+  Future<User> login(String email, String password);
+  Future<User> register(String name, String email, String password);
   Future<void> logout();
+  Future<void> forgotPassword(String email);
   Future<bool> checkAuthStatus();
-  bool get isAuthenticated;
-  String? get currentUserId;
+  Future<User?> getCachedUser();
 }

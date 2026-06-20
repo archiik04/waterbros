@@ -1,30 +1,35 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../../../core/network/dio_client.dart';
 import '../../data/repositories/auth_repository_impl.dart';
+import '../../data/sources/auth_local_data_source.dart';
+import '../../data/sources/auth_remote_data_source.dart';
+import '../../domain/models/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 
-enum AuthStatus { unauthenticated, authenticating, authenticated, error }
+enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
 
 class AuthState {
   final AuthStatus status;
-  final String? userId;
+  final User? user;
   final String? errorMessage;
 
   const AuthState({
     required this.status,
-    this.userId,
+    this.user,
     this.errorMessage,
   });
 
-  factory AuthState.initial() => const AuthState(status: AuthStatus.unauthenticated);
+  factory AuthState.initial() => const AuthState(status: AuthStatus.initial);
 
   AuthState copyWith({
     AuthStatus? status,
-    String? userId,
+    User? user,
     String? errorMessage,
   }) {
     return AuthState(
       status: status ?? this.status,
-      userId: userId ?? this.userId,
+      user: user ?? this.user,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
@@ -33,77 +38,119 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _authRepository;
 
-  AuthNotifier(this._authRepository) : super(AuthState.initial());
+  AuthNotifier(this._authRepository) : super(AuthState.initial()) {
+    // Automatically trigger checking authentication status on launch
+    checkAuthStatus();
+  }
 
-  Future<void> login(String email, String password) async {
-    state = state.copyWith(status: AuthStatus.authenticating);
+  Future<void> checkAuthStatus() async {
+    state = const AuthState(status: AuthStatus.loading);
     try {
-      final success = await _authRepository.login(email, password);
-      if (success) {
+      final isLoggedIn = await _authRepository.checkAuthStatus();
+      if (isLoggedIn) {
+        final user = await _authRepository.getCachedUser();
         state = AuthState(
           status: AuthStatus.authenticated,
-          userId: _authRepository.currentUserId,
+          user: user,
         );
       } else {
         state = const AuthState(
           status: AuthStatus.unauthenticated,
-          errorMessage: 'Login failed',
         );
       }
     } catch (e) {
       state = AuthState(
-        status: AuthStatus.error,
+        status: AuthStatus.unauthenticated,
         errorMessage: e.toString(),
       );
     }
   }
 
-  Future<void> register(String email, String password) async {
-    state = state.copyWith(status: AuthStatus.authenticating);
+  Future<void> login(String email, String password) async {
+    state = const AuthState(status: AuthStatus.loading);
     try {
-      final success = await _authRepository.register(email, password);
-      if (success) {
-        state = AuthState(
-          status: AuthStatus.authenticated,
-          userId: _authRepository.currentUserId,
-        );
-      } else {
-        state = const AuthState(
-          status: AuthStatus.unauthenticated,
-          errorMessage: 'Registration failed',
-        );
-      }
+      final user = await _authRepository.login(email, password);
+      state = AuthState(
+        status: AuthStatus.authenticated,
+        user: user,
+      );
     } catch (e) {
+      final errorMsg = e.toString().replaceFirst('Exception: ', '');
       state = AuthState(
         status: AuthStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: errorMsg,
+      );
+    }
+  }
+
+  Future<void> register(String name, String email, String password) async {
+    state = const AuthState(status: AuthStatus.loading);
+    try {
+      final user = await _authRepository.register(name, email, password);
+      state = AuthState(
+        status: AuthStatus.authenticated,
+        user: user,
+      );
+    } catch (e) {
+      final errorMsg = e.toString().replaceFirst('Exception: ', '');
+      state = AuthState(
+        status: AuthStatus.error,
+        errorMessage: errorMsg,
       );
     }
   }
 
   Future<void> logout() async {
-    await _authRepository.logout();
-    state = AuthState.initial();
+    state = const AuthState(status: AuthStatus.loading);
+    try {
+      await _authRepository.logout();
+    } catch (_) {
+    } finally {
+      state = const AuthState(status: AuthStatus.unauthenticated);
+    }
   }
 
-  Future<bool> sendPasswordResetEmail(String email) async {
-    state = state.copyWith(status: AuthStatus.authenticating);
+  Future<bool> forgotPassword(String email) async {
+    state = const AuthState(status: AuthStatus.loading);
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
-      state = state.copyWith(status: AuthStatus.unauthenticated);
+      await _authRepository.forgotPassword(email);
+      state = const AuthState(status: AuthStatus.unauthenticated);
       return true;
     } catch (e) {
+      final errorMsg = e.toString().replaceFirst('Exception: ', '');
       state = AuthState(
         status: AuthStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: errorMsg,
       );
       return false;
     }
   }
 }
 
+// Riverpod Dependency Providers
+final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
+  return const FlutterSecureStorage();
+});
+
+final authLocalDataSourceProvider = Provider<AuthLocalDataSource>((ref) {
+  final storage = ref.watch(secureStorageProvider);
+  return AuthLocalDataSource(storage);
+});
+
+final dioProvider = Provider((ref) {
+  final local = ref.watch(authLocalDataSourceProvider);
+  return DioClient.createDio(local);
+});
+
+final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
+  final dio = ref.watch(dioProvider);
+  return AuthRemoteDataSource(dio);
+});
+
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepositoryImpl();
+  final remote = ref.watch(authRemoteDataSourceProvider);
+  final local = ref.watch(authLocalDataSourceProvider);
+  return AuthRepositoryImpl(remote, local);
 });
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {

@@ -61,6 +61,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
     if ((_formKey.currentState?.validate() ?? false) && _acceptTerms) {
       ref.read(authProvider.notifier).register(
+            _nameController.text.trim(),
             _emailController.text.trim(),
             _passwordController.text.trim(),
           );
@@ -282,7 +283,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       ),
 
                     // Submit button
-                    if (authState.status == AuthStatus.authenticating)
+                    if (authState.status == AuthStatus.loading)
                       const Center(
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 12.0),

@@ -36,6 +36,12 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: routerNotifier,
     redirect: (context, state) {
       final authState = ref.read(authProvider);
+
+      // Prevent pre-emptive redirection during startup validation
+      if (authState.status == AuthStatus.initial || authState.status == AuthStatus.loading) {
+        return null;
+      }
+
       final isLoggedIn = authState.status == AuthStatus.authenticated;
 
       final isGoingToWelcome = state.matchedLocation == '/welcome';

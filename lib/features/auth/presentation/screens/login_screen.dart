@@ -176,7 +176,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
 
                     // Login button
-                    if (authState.status == AuthStatus.authenticating)
+                    if (authState.status == AuthStatus.loading)
                       const Center(
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 12.0),

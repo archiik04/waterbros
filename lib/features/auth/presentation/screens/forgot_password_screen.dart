@@ -23,7 +23,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   void _submit() async {
     if (_formKey.currentState?.validate() ?? false) {
-      final success = await ref.read(authProvider.notifier).sendPasswordResetEmail(
+      final success = await ref.read(authProvider.notifier).forgotPassword(
             _emailController.text.trim(),
           );
       if (success) {
@@ -134,7 +134,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             ),
 
           // Reset Password Button
-          if (authState.status == AuthStatus.authenticating)
+          if (authState.status == AuthStatus.loading)
             const Center(
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 12.0),

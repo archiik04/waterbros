@@ -1,0 +1,29 @@
+services:
+  mongo:
+    image: mongo:latest
+    container_name: waterbros-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+
+  server:
+    build: .
+    container_name: waterbros-server
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongo
+    environment:
+      - PORT=8000
+      - MONGODB_URI=mongodb://mongo:27017/waterbros
+      - JWT_ACCESS_SECRET=your_jwt_access_token_secret_key_32_chars_long_waterbros
+      - JWT_REFRESH_SECRET=your_jwt_refresh_token_secret_key_32_chars_long_waterbros
+      - JWT_ACCESS_EXPIRY=15m
+      - JWT_REFRESH_EXPIRY=7d
+    restart: unless-stopped
+
+volumes:
+  mongo-data:
+    driver: local
