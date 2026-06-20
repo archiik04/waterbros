@@ -85,6 +85,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await _authRepository.logout();
     state = AuthState.initial();
   }
+
+  Future<bool> sendPasswordResetEmail(String email) async {
+    state = state.copyWith(status: AuthStatus.authenticating);
+    try {
+      await Future.delayed(const Duration(milliseconds: 500));
+      state = state.copyWith(status: AuthStatus.unauthenticated);
+      return true;
+    } catch (e) {
+      state = AuthState(
+        status: AuthStatus.error,
+        errorMessage: e.toString(),
+      );
+      return false;
+    }
+  }
 }
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {

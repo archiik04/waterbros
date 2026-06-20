@@ -36,7 +36,7 @@ class WelcomeScreen extends StatelessWidget {
               ),
               const Spacer(),
               ElevatedButton(
-                onPressed: () => context.go('/auth'),
+                onPressed: () => context.go('/login'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2563EB), // Brand Blue
                   foregroundColor: Colors.white,
@@ -46,7 +46,7 @@ class WelcomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               TextButton(
-                onPressed: () => context.go('/auth'),
+                onPressed: () => context.go('/login'),
                 child: const Text('Already have an account? Sign In'),
               ),
             ],

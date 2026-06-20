@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/providers/auth_provider.dart';
-import '../../features/auth/presentation/screens/auth_screen.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/signup_screen.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/onboarding/presentation/screens/add_buddy_onboarding_screen.dart';
 import '../../features/onboarding/presentation/screens/notification_permissions_screen.dart';
 import '../../features/onboarding/presentation/screens/profile_setup_screen.dart';
@@ -37,8 +39,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isLoggedIn = authState.status == AuthStatus.authenticated;
 
       final isGoingToWelcome = state.matchedLocation == '/welcome';
-      final isGoingToAuth = state.matchedLocation == '/auth';
-      final isPublicRoute = isGoingToWelcome || isGoingToAuth;
+      final isGoingToLogin = state.matchedLocation == '/login';
+      final isGoingToSignup = state.matchedLocation == '/signup';
+      final isGoingToForgotPassword = state.matchedLocation == '/forgot-password';
+      
+      final isPublicRoute = isGoingToWelcome || isGoingToLogin || isGoingToSignup || isGoingToForgotPassword;
 
       // If the user is NOT logged in and trying to access a protected route, redirect to welcome
       if (!isLoggedIn && !isPublicRoute) {
@@ -59,8 +64,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const WelcomeScreen(),
       ),
       GoRoute(
-        path: '/auth',
-        builder: (context, state) => const AuthScreen(),
+        path: '/login',
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/signup',
+        builder: (context, state) => const SignupScreen(),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) => const ForgotPasswordScreen(),
       ),
 
       // Protected Onboarding steps (rendered outside the main navigation shell)
