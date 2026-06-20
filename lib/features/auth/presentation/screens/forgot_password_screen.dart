@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:waterbros/features/onboarding/presentation/screens/welcome_screen.dart';
 import '../providers/auth_provider.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
@@ -39,6 +40,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.white,
       appBar: AppBar(
         title: const Text('Reset Password'),
       ),
@@ -48,7 +50,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 400),
-              child: _emailSentSuccess ? _buildSuccessState(context) : _buildRequestState(context, authState, isDark),
+              child: _emailSentSuccess ? _buildSuccessState(context, isDark) : _buildRequestState(context, authState, isDark),
             ),
           ),
         ),
@@ -62,16 +64,22 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Icon(
-            Icons.lock_reset_rounded,
-            size: 80,
-            color: Color(0xFF2563EB), // Brand Blue
+          // Use cute droplet painter instead of generic icon for brand alignment
+          Center(
+            child: SizedBox(
+              width: 100,
+              height: 120,
+              child: CustomPaint(
+                painter: DropletPainter(),
+              ),
+            ),
           ),
           const SizedBox(height: 24),
           Text(
             'Forgot Your Password?',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : const Color(0xFF111827),
                 ),
             textAlign: TextAlign.center,
           ),
@@ -89,12 +97,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Email Address',
-              prefixIcon: const Icon(Icons.email_outlined),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              prefixIcon: Icon(Icons.email_outlined),
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -117,7 +122,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFEE2E2),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: const Color(0xFFEF4444)),
                 ),
                 child: Text(
@@ -140,16 +145,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             ElevatedButton(
               onPressed: _submit,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                backgroundColor: isDark ? Colors.white : Colors.black,
+                foregroundColor: isDark ? Colors.black : Colors.white,
+                shape: const StadiumBorder(),
               ),
               child: const Text(
                 'SEND RESET INSTRUCTIONS',
-                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           const SizedBox(height: 24),
@@ -159,13 +160,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back),
             label: const Text('Back to Login'),
+            style: TextButton.styleFrom(
+              foregroundColor: isDark ? const Color(0xFF94A3B8) : const Color(0xFF4B5563),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSuccessState(BuildContext context) {
+  Widget _buildSuccessState(BuildContext context, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -199,13 +203,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           'Email Sent Successfully',
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : const Color(0xFF111827),
               ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16),
         Text(
           'We have sent a password reset link to:\n${_emailController.text}\n\nPlease check your inbox and spam folder.',
-          style: Theme.of(context).textTheme.bodyMedium,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 32),
@@ -214,16 +221,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             Navigator.pop(context); // Go back to login screen
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2563EB),
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            backgroundColor: isDark ? Colors.white : Colors.black,
+            foregroundColor: isDark ? Colors.black : Colors.white,
+            shape: const StadiumBorder(),
           ),
           child: const Text(
             'BACK TO LOGIN',
-            style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
       ],

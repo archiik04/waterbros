@@ -73,6 +73,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.white,
       appBar: AppBar(
         title: const Text('Create Account'),
       ),
@@ -91,6 +92,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       'Join WaterBros Today',
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : const Color(0xFF111827),
                           ),
                       textAlign: TextAlign.center,
                     ),
@@ -107,12 +109,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     // Full Name Field
                     TextFormField(
                       controller: _nameController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Full Name',
-                        prefixIcon: const Icon(Icons.person_outline),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        prefixIcon: Icon(Icons.person_outline),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -130,12 +129,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Email Address',
-                        prefixIcon: const Icon(Icons.email_outlined),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        prefixIcon: Icon(Icons.email_outlined),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -167,9 +163,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                             });
                           },
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -189,9 +182,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Password Requirements:',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold, 
+                              fontSize: 12,
+                              color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1E293B),
+                            ),
                           ),
                           const SizedBox(height: 6),
                           _buildCriteriaRow('Min 8 characters', _hasMinLength),
@@ -220,9 +217,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                             });
                           },
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -239,6 +233,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     // Terms Box
                     CheckboxListTile(
                       value: _acceptTerms,
+                      activeColor: isDark ? Colors.white : Colors.black,
+                      checkColor: isDark ? Colors.black : Colors.white,
                       onChanged: (val) {
                         if (val != null) {
                           setState(() {
@@ -247,9 +243,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           });
                         }
                       },
-                      title: const Text(
+                      title: Text(
                         'I acknowledge the Terms of Service and Privacy Policy.',
-                        style: TextStyle(fontSize: 13),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1E293B),
+                        ),
                       ),
                       controlAffinity: ListTileControlAffinity.leading,
                       contentPadding: EdgeInsets.zero,
@@ -271,7 +270,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: const Color(0xFFFEE2E2),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: const Color(0xFFEF4444)),
                           ),
                           child: Text(
@@ -294,16 +293,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       ElevatedButton(
                         onPressed: _submit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2563EB),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          backgroundColor: isDark ? Colors.white : Colors.black,
+                          foregroundColor: isDark ? Colors.black : Colors.white,
+                          shape: const StadiumBorder(),
                         ),
                         child: const Text(
                           'CREATE ACCOUNT',
-                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                     const SizedBox(height: 32),
@@ -320,6 +315,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                         ),
                         TextButton(
                           onPressed: () => context.pop(),
+                          style: TextButton.styleFrom(
+                            foregroundColor: isDark ? Colors.white : Colors.black,
+                          ),
                           child: const Text('Log In'),
                         ),
                       ],

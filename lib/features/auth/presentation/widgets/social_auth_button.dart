@@ -28,7 +28,7 @@ class SocialAuthButton extends StatelessWidget {
         side: BorderSide(color: borderColor),
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
         ),
       ),
       child: Row(
